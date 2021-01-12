@@ -93,6 +93,10 @@ public class Keyboard extends LinearLayout {
         addKeys(array);
     }
 
+    public void setNightThemeEnabled(boolean nightThemeEnabled) {
+        this.nightThemeEnabled = nightThemeEnabled;
+    }
+
     private void addKeys(ArrayList<String[]> keyLines) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout host = keyboardView.findViewById(R.id.button_1);

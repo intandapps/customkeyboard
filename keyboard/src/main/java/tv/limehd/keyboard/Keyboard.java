@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.hardware.Camera;
+import android.hardware.SensorManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,12 +60,25 @@ public class Keyboard extends LinearLayout {
     private boolean numberLineEnabled;
     private boolean nightThemeEnabled;
     private boolean isRussian = true;
+    private int orientation = 4;
 
     public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup) {
         super(context);
         this.callback = callback;
         this.viewGroup = viewGroup;
         this.windowManager = windowManager;
+        OrientationEventListener orientationListener = new OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
+            @Override
+            public void onOrientationChanged(int i) {
+                int rotate = windowManager.getDefaultDisplay().getRotation();
+                if (rotate != orientation) {
+                    orientation = rotate;
+                    hideKeyboard();
+                    showKeyboard();
+                }
+            }
+        };
+        orientationListener.enable();
     }
 
     public void showKeyboard() {

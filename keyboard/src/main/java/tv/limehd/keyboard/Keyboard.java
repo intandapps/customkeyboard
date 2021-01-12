@@ -42,6 +42,7 @@ public class Keyboard extends LinearLayout {
     };
 
     private Button firstKey, changeLanguage;
+    private LinearLayout linearLayout;
 
     // Параметры для установки размеров клавиатура
     private final int param = 12; // Ряд кнопок = 1/12 от высота экрана => клавиатура из 4х рядов занимает 1/3 экрана по высоте
@@ -86,7 +87,11 @@ public class Keyboard extends LinearLayout {
             }
         } else { // Портрет
             dpHeight = Math.round(dpWidth * sizeRation) - margin * 2;
-            params.setMargins(0, 0, 0, getSize());
+            if (isButtonsOnTheBottom()) {
+                params.setMargins(0, 0, 0, getSize());
+            } else {
+                params.setMargins(0, getSize(), 0, 0);
+            }
         }
         LayoutInflater inflater = LayoutInflater.from(getContext());
         if (numberLineEnabled) {
@@ -94,7 +99,7 @@ public class Keyboard extends LinearLayout {
         } else {
             keyboardView = inflater.inflate(R.layout.keyboard_view, viewGroup, true);
         }
-        LinearLayout linearLayout = keyboardView.findViewById(R.id.button_1);
+        linearLayout = keyboardView.findViewById(R.id.button_1);
         linearLayout.setLayoutParams(params);
 
         ArrayList<String[]> array = new ArrayList<>();
@@ -113,6 +118,33 @@ public class Keyboard extends LinearLayout {
 
     public void setNightThemeEnabled(boolean nightThemeEnabled) {
         this.nightThemeEnabled = nightThemeEnabled;
+    }
+
+    public void updateConfiguration() {
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        float width = Float.parseFloat(String.valueOf(size.x));
+        float height = Float.parseFloat(String.valueOf(size.y));
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.BOTTOM;
+        if (width > height) { // Пейзаж
+            dpHeight = Math.round(height / param) - margin * 2;
+            if (isButtonsOnTheRight()) {
+                params.setMargins(0, 0, getSize(), 0);
+            } else {
+                params.setMargins(getSize(), 0, 0, 0);
+
+            }
+        } else { // Портрет
+            dpHeight = Math.round(dpWidth * sizeRation) - margin * 2;
+            if (isButtonsOnTheBottom()) {
+                params.setMargins(0, 0, 0, getSize());
+            } else {
+                params.setMargins(0, getSize(), 0, 0);
+            }
+        }
+        linearLayout.setLayoutParams(params);
     }
 
     private void addKeys(ArrayList<String[]> keyLines) {
@@ -361,10 +393,19 @@ public class Keyboard extends LinearLayout {
     }
 
     private boolean isButtonsOnTheRight() {
-
         int rotate = windowManager.getDefaultDisplay().getRotation();
         switch (rotate) {
             case Surface.ROTATION_90:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isButtonsOnTheBottom() {
+        int rotate = windowManager.getDefaultDisplay().getRotation();
+        switch (rotate) {
+            case Surface.ROTATION_0:
                 return true;
             default:
                 return false;

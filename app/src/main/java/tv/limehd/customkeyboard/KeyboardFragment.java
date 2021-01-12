@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -59,6 +60,7 @@ public class KeyboardFragment extends Fragment implements Keyboard.KeyListener {
             }
             isKeyboardActivated = !isKeyboardActivated;
         });
+
         //input.setOnTouchListener((view, e) -> true);
 
         Button showKeyboardButton = v.findViewById(R.id.show_button);
@@ -99,5 +101,17 @@ public class KeyboardFragment extends Fragment implements Keyboard.KeyListener {
         if (input.length() > 0) {
             input.setText("");
         }
+    }
+
+    @Override
+    public void onKeyboardHideClicked() {
+        Toast.makeText(getContext(), "onKeyboardHideClicked", Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onKeyboardOkClicked() {
+        Toast.makeText(getContext(), "onKeyboardOkClicked", Toast.LENGTH_SHORT).show();
+
     }
 }

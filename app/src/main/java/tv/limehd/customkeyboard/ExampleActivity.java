@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import tv.limehd.keyboard.Keyboard;
 
@@ -92,4 +93,16 @@ public class ExampleActivity extends AppCompatActivity implements Keyboard.KeyLi
             input.setText("");
         }
     }
+
+    @Override
+    public void onKeyboardHideClicked() {
+        Toast.makeText(this, "onKeyboardHideClicked", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onKeyboardOkClicked() {
+        Toast.makeText(this, "onKeyboardOkClicked", Toast.LENGTH_SHORT).show();
+    }
+
+
 }

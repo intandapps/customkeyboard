@@ -170,10 +170,22 @@ public class Keyboard extends LinearLayout {
                 }
             }
         }
-
-        // Добавление пробела
         linearLayout = keyboardView.findViewById(getLinearLayoutId(numberLineEnabled ? keyLines.size() : keyLines.size() - 1));
-        View v = inflater.inflate(R.layout.keyboard_space, linearLayout, true);
+        View v = inflater.inflate(R.layout.keyboard_hide, linearLayout, true);
+        ImageButton ib = v.findViewById(R.id.key_button);
+        if (nightThemeEnabled) {
+            ib.setBackground(getResources().getDrawable(R.drawable.night_action_button_style));
+            ib.setColorFilter(getResources().getColor(R.color.white));
+        } else {
+            ib.setBackground(getResources().getDrawable(R.drawable.action_button_style));
+        }
+        ib.setOnClickListener(v1 -> {
+            callback.onKeyboardHideClicked();
+        });
+        ib.setId(R.id.button_1);
+        setClearSize(ib);
+        // Добавление пробела
+        v = inflater.inflate(R.layout.keyboard_space, linearLayout, true);
         Button b = v.findViewById(R.id.key_button);
         b.setOnClickListener(v1 -> callback.onKeyClicked(" "));
         setSpaceSize(b);
@@ -183,6 +195,18 @@ public class Keyboard extends LinearLayout {
         } else {
             b.setBackground(getResources().getDrawable(R.drawable.action_button_style));
         }
+        v = inflater.inflate(R.layout.keyboard_search, linearLayout, true);
+        ib = v.findViewById(R.id.key_button);
+        if (nightThemeEnabled) {
+            ib.setBackground(getResources().getDrawable(R.drawable.night_action_button_style));
+            ib.setColorFilter(getResources().getColor(R.color.white));
+        } else {
+            ib.setBackground(getResources().getDrawable(R.drawable.action_button_style));
+        }
+        ib.setOnClickListener(v1 -> {
+            callback.onKeyboardOkClicked();
+        });
+        setClearSize(ib);
     }
 
     public void setFocus() {
@@ -259,6 +283,8 @@ public class Keyboard extends LinearLayout {
         void onKeyClicked(String key);
         void onDeleteButtonClicked();
         void onLongDeleteButtonClicked();
+        void onKeyboardHideClicked();
+        void onKeyboardOkClicked();
     }
 
     private void setNightMode(boolean status) {

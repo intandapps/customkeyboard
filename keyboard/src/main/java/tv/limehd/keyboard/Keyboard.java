@@ -34,6 +34,8 @@ public class Keyboard extends LinearLayout {
     private ViewGroup viewGroup;
     private boolean isFocused = false;
 
+    private boolean isKeyboardActive = false;
+
     private final String[][] keyboard = new String[][] {
             {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "(", ")"},
             {"Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х", "Ъ"},
@@ -73,8 +75,10 @@ public class Keyboard extends LinearLayout {
                 int rotate = windowManager.getDefaultDisplay().getRotation();
                 if (rotate != orientation) {
                     orientation = rotate;
-                    hideKeyboard();
-                    showKeyboard();
+                    if (isKeyboardActive) {
+                        hideKeyboard();
+                        showKeyboard();
+                    }
                 }
             }
         };
@@ -130,6 +134,7 @@ public class Keyboard extends LinearLayout {
             }
         }
         addKeys(array);
+        isKeyboardActive = true;
     }
 
     public void setNightThemeEnabled(boolean nightThemeEnabled) {
@@ -316,6 +321,7 @@ public class Keyboard extends LinearLayout {
         } else {
             Log.e("Keyboard", "Keyboard is null!");
         }
+        isKeyboardActive = false;
     }
 
     public interface KeyListener {

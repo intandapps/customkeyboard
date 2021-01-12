@@ -120,33 +120,6 @@ public class Keyboard extends LinearLayout {
         this.nightThemeEnabled = nightThemeEnabled;
     }
 
-    public void updateConfiguration() {
-        Display display = windowManager.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        float width = Float.parseFloat(String.valueOf(size.x));
-        float height = Float.parseFloat(String.valueOf(size.y));
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.gravity = Gravity.BOTTOM;
-        if (width > height) { // Пейзаж
-            dpHeight = Math.round(height / param) - margin * 2;
-            if (isButtonsOnTheRight()) {
-                params.setMargins(0, 0, getSize(), 0);
-            } else {
-                params.setMargins(getSize(), 0, 0, 0);
-
-            }
-        } else { // Портрет
-            dpHeight = Math.round(dpWidth * sizeRation) - margin * 2;
-            if (isButtonsOnTheBottom()) {
-                params.setMargins(0, 0, 0, getSize());
-            } else {
-                params.setMargins(0, getSize(), 0, 0);
-            }
-        }
-        linearLayout.setLayoutParams(params);
-    }
-
     private void addKeys(ArrayList<String[]> keyLines) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout host = keyboardView.findViewById(R.id.button_1);

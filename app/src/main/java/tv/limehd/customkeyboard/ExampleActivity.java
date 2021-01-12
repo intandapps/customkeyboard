@@ -2,6 +2,7 @@ package tv.limehd.customkeyboard;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -56,7 +57,9 @@ public class ExampleActivity extends AppCompatActivity implements Keyboard.KeyLi
             }
             isKeyboardActivated = !isKeyboardActivated;
         });
+        //Toast.makeText(this, "Size: " + String.valueOf(getSize()), Toast.LENGTH_SHORT).show();
     }
+
 
     public void onClick(View v) {
         if (!isKeyboardActivated) {

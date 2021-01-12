@@ -2,14 +2,19 @@ package tv.limehd.keyboard;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -68,10 +73,20 @@ public class Keyboard extends LinearLayout {
         margin = Math.round(width / 135) / 2;
         //dpWidth = Math.round(width / param) - margin * 2;
         dpWidth = (int) Math.floor(width / param) - margin * 2;
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.gravity = Gravity.BOTTOM;
+
         if (width > height) { // Пейзаж
             dpHeight = Math.round(height / param) - margin * 2;
+            if (isButtonsOnTheRight()) {
+                params.setMargins(0, 0, getSize(), 0);
+            } else {
+                params.setMargins(getSize(), 0, 0, 0);
+
+            }
         } else { // Портрет
             dpHeight = Math.round(dpWidth * sizeRation) - margin * 2;
+            params.setMargins(0, 0, 0, getSize());
         }
         LayoutInflater inflater = LayoutInflater.from(getContext());
         if (numberLineEnabled) {
@@ -79,6 +94,9 @@ public class Keyboard extends LinearLayout {
         } else {
             keyboardView = inflater.inflate(R.layout.keyboard_view, viewGroup, true);
         }
+        LinearLayout linearLayout = keyboardView.findViewById(R.id.button_1);
+        linearLayout.setLayoutParams(params);
+
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);
         if (isRussian) {
@@ -326,6 +344,30 @@ public class Keyboard extends LinearLayout {
             keyboard.setNightMode(nightMode);
             keyboard.setNumberLine(numberLine);
             return keyboard;
+        }
+    }
+
+    private int getSize() { // Размер системных навигационных кнопок (высота)
+        Resources resources = this.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+    }
+
+    public static float convertPixelsToDp(float px, Context context){
+        return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    private boolean isButtonsOnTheRight() {
+
+        int rotate = windowManager.getDefaultDisplay().getRotation();
+        switch (rotate) {
+            case Surface.ROTATION_90:
+                return true;
+            default:
+                return false;
         }
     }
 }

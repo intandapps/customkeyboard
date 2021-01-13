@@ -1,21 +1,30 @@
 package tv.limehd.keyboard;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.SensorManager;
+import android.os.Build;
+import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -23,6 +32,11 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.view.ViewCompat;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class Keyboard extends LinearLayout {
@@ -49,6 +63,7 @@ public class Keyboard extends LinearLayout {
 
     private Button firstKey, changeLanguage;
     private LinearLayout linearLayout;
+    int navigationBarHeight;
 
     // Параметры для установки размеров клавиатура
     private final int param = 12; // Ряд кнопок = 1/12 от высота экрана => клавиатура из 4х рядов занимает 1/3 экрана по высоте
@@ -65,12 +80,16 @@ public class Keyboard extends LinearLayout {
     private boolean isRussian = true;
     private int orientation = 4;
     private Button capButton;
+    private Window window;
+    private Context context;
 
-    public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup) {
+    public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup, Window window) {
         super(context);
         this.callback = callback;
         this.viewGroup = viewGroup;
         this.windowManager = windowManager;
+        this.window = window;
+        this.context = context;
         OrientationEventListener orientationListener = new OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int i) {
@@ -364,6 +383,7 @@ public class Keyboard extends LinearLayout {
         private WindowManager windowManager;
         private KeyListener callback;
         private ViewGroup viewGroup;
+        private Window window;
         private boolean nightMode = false;
         private boolean numberLine = false;
 
@@ -372,6 +392,7 @@ public class Keyboard extends LinearLayout {
             this.windowManager = activity.getWindowManager();
             this.callback = callback;
             this.viewGroup = (ViewGroup) activity.getWindow().getDecorView().getRootView();
+            this.window = activity.getWindow();
         }
 
         public Builder setNightMode(boolean status) {
@@ -385,7 +406,7 @@ public class Keyboard extends LinearLayout {
         }
 
         public Keyboard build() {
-            Keyboard keyboard = new Keyboard(context, windowManager, callback, viewGroup);
+            Keyboard keyboard = new Keyboard(context, windowManager, callback, viewGroup, window);
             keyboard.setNightMode(nightMode);
             keyboard.setNumberLine(numberLine);
             return keyboard;
@@ -396,13 +417,55 @@ public class Keyboard extends LinearLayout {
         Resources resources = this.getResources();
         int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
         if (resourceId > 0) {
+            Log.e(TAG, "bar height: " + resources.getDimensionPixelSize(resourceId));
+            Log.e(TAG, "bar height: " + resources.getDimension(resourceId));
+            Log.e(TAG, "bar height: " + resources.getDimensionPixelOffset(resourceId));
+            Log.e(TAG, "bar height new: " + convertDpToPixel(resources.getDimension(resourceId), context));
             return resources.getDimensionPixelSize(resourceId);
         }
         return 0;
     }
 
+    public static Point getAppUsableScreenSize(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            context.getDisplay().getRealMetrics(displayMetrics);
+        }
+        Log.e("keyboard.java", "real height: " + displayMetrics.heightPixels);
+        context.getDisplay().getMetrics(displayMetrics);
+        Log.e("keyboard.java", "real height: " + displayMetrics.heightPixels);
+
+        return size;
+    }
+
+    public static Point getRealScreenSize(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+
+        if (Build.VERSION.SDK_INT >= 17) {
+            display.getRealSize(size);
+        } else if (Build.VERSION.SDK_INT >= 14) {
+            try {
+                size.x = (Integer)     Display.class.getMethod("getRawWidth").invoke(display);
+                size.y = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
+            } catch (IllegalAccessException e) {} catch     (InvocationTargetException e) {} catch (NoSuchMethodException e) {}
+        }
+
+        return size;
+    }
+
     public static float convertPixelsToDp(float px, Context context){
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    public static float convertDpToPixel(float dp, Context context){
+        return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     private boolean isButtonsOnTheRight() {

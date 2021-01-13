@@ -258,6 +258,11 @@ public class Keyboard extends LinearLayout {
         isFocused = true;
     }
 
+    public void setFocusOnBoard() {
+        keyboardView.requestFocus();
+        keyboardView.requestFocusFromTouch();
+    }
+
     private void setLangunageButtonSize(Button button) {
         LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         params.height = dpHeight ;

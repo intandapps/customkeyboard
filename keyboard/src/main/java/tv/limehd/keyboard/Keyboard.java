@@ -121,7 +121,7 @@ public class Keyboard extends LinearLayout {
         }
         linearLayout = keyboardView.findViewById(R.id.button_1);
         linearLayout.setLayoutParams(params);
-
+        keyboardView.setOnClickListener(v1 -> { });
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);
         if (isRussian) {

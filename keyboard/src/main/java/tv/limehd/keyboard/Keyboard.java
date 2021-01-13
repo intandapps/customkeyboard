@@ -33,7 +33,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -413,7 +415,34 @@ public class Keyboard extends LinearLayout {
         }
     }
 
+
     private int getSize() { // Размер системных навигационных кнопок (высота)
+
+
+        Rect rectangle = new Rect();
+        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+        int statusBarHeight = rectangle.top;
+        int contentViewTop =
+                window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+        int titleBarHeight= contentViewTop - statusBarHeight;
+        Log.e(TAG, "statusBarHeight: " + statusBarHeight);
+        Log.e(TAG, "titleBarHeight: " + titleBarHeight);
+
+        int h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight()
+                - window.getDecorView().getRootView().getHeight();
+        Log.e(TAG, "h: " + h);
+
+        return Math.abs(h) - statusBarHeight;
+
+        /*ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView().getRootView(), new androidx.core.view.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
+                final int statusBarHeight = insets.getStableInsetBottom();
+                Log.e(TAG, "statusBarHeight: " + statusBarHeight);
+                return insets.consumeStableInsets();
+            }
+        });
+
         Resources resources = this.getResources();
         int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
         if (resourceId > 0) {
@@ -423,7 +452,7 @@ public class Keyboard extends LinearLayout {
             Log.e(TAG, "bar height new: " + convertDpToPixel(resources.getDimension(resourceId), context));
             return resources.getDimensionPixelSize(resourceId);
         }
-        return 0;
+        return 0;*/
     }
 
     public static Point getAppUsableScreenSize(Context context) {

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
@@ -63,6 +64,7 @@ public class Keyboard extends LinearLayout {
     private boolean nightThemeEnabled;
     private boolean isRussian = true;
     private int orientation = 4;
+    private Button capButton;
 
     public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup) {
         super(context);
@@ -121,7 +123,13 @@ public class Keyboard extends LinearLayout {
         }
         linearLayout = keyboardView.findViewById(R.id.button_1);
         linearLayout.setLayoutParams(params);
-        keyboardView.setOnClickListener(v1 -> { });
+        keyboardView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);
         if (isRussian) {
@@ -135,6 +143,11 @@ public class Keyboard extends LinearLayout {
         }
         addKeys(array);
         isKeyboardActive = true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return true;
     }
 
     public void setNightThemeEnabled(boolean nightThemeEnabled) {

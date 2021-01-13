@@ -430,7 +430,15 @@ public class Keyboard extends LinearLayout {
 
         int h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight()
                 - window.getDecorView().getRootView().getHeight();
+        if (h == 0) {
+            h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth()
+                    - window.getDecorView().getRootView().getWidth();
+            Log.e(TAG, "h: " + h);
+            return Math.abs(h);
+
+        }
         Log.e(TAG, "h: " + h);
+
 
         return Math.abs(h) - statusBarHeight;
 

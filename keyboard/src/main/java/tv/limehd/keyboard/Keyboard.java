@@ -150,7 +150,7 @@ public class Keyboard extends LinearLayout {
             }
         });
         LinearLayout ll = (LinearLayout) keyboardView.findViewById(R.id.button_1);
-        ll.setLayoutParams(params);
+        //ll.setLayoutParams(params);
 
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);

@@ -123,20 +123,28 @@ public class Keyboard extends LinearLayout {
         if (width > height) { // Пейзаж
             dpHeight = Math.round(height / param) - margin * 2;
             if (isTablet(getContext())) {
-                params.setMargins(0, 0,0, getSize() * 2);
+                //params.setMargins(0, 0,0, getSize() * 2);
+                params.setMargins(0, 0,0, 0);
+
             }
             else if (isButtonsOnTheRight()) {
-                params.setMargins(0, 0, getSize(), 0);
-            } else {
-                params.setMargins(getSize(), 0, 0, 0);
+                //params.setMargins(0, 0, getSize(), 0);
+                params.setMargins(0, 0, 0, 0);
 
+            } else {
+                //params.setMargins(getSize(), 0, 0, 0);
+                params.setMargins(0, 0, 0, 0);
             }
         } else { // Портрет
             dpHeight = Math.round(dpWidth * sizeRation) - margin * 2;
             if (isButtonsOnTheBottom()) {
-                params.setMargins(0, 0, 0, getSize());
+                //params.setMargins(0, 0, 0, getSize());
+                params.setMargins(0, 0, 0, 0);
+
             } else {
-                params.setMargins(0, getSize(), 0, 0);
+                //params.setMargins(0, getSize(), 0, 0);
+                params.setMargins(0, 0, 0, 0);
+
             }
         }
 

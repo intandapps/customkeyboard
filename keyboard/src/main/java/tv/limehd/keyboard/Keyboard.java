@@ -149,7 +149,13 @@ public class Keyboard extends LinearLayout {
         }
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        keyboardView = (LinearLayout) inflater.inflate(R.layout.keyboard_view, null, false);
+
+        if (numberLineEnabled) {
+            keyboardView = (LinearLayout) inflater.inflate(R.layout.keyboard_view_nums, null, false);
+        } else {
+            keyboardView = inflater.inflate(R.layout.keyboard_view, null, false);
+        }
+
         ((ViewGroup) v).addView(keyboardView);
         keyboardView.setOnTouchListener(new OnTouchListener() {
             @Override
@@ -394,8 +400,9 @@ public class Keyboard extends LinearLayout {
 
     public void hideKeyboard() {
         if (keyboardView != null) {
-            View v = keyboardView.findViewById(R.id.button_1);
-            viewGroup.removeView(v);
+            //View v = keyboardView.findViewById(R.id.button_1);
+            //viewGroup.removeView(v);
+            ((ViewGroup) v).removeView(keyboardView);
             //Log.e(TAG, "Keyboard was hidden");
         } else {
             //Log.e("Keyboard", "Keyboard is null!");

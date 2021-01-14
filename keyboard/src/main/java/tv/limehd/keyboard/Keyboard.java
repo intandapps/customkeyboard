@@ -149,8 +149,8 @@ public class Keyboard extends LinearLayout {
                 return true;
             }
         });
-        LinearLayout ll = (LinearLayout) keyboardView.findViewById(R.id.button_1);
-        //ll.setLayoutParams(params);
+        //LinearLayout ll = (LinearLayout) keyboardView.findViewById(R.id.button_1);
+        keyboardView.setLayoutParams(params);
 
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);

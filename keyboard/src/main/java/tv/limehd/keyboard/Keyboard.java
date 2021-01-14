@@ -66,8 +66,6 @@ public class Keyboard extends LinearLayout {
 
     private Button firstKey, changeLanguage;
     private LinearLayout linearLayout;
-    int navigationBarHeight;
-    private Activity activity;
 
     // Параметры для установки размеров клавиатура
     private final int param = 12; // Ряд кнопок = 1/12 от высота экрана => клавиатура из 4х рядов занимает 1/3 экрана по высоте
@@ -83,18 +81,16 @@ public class Keyboard extends LinearLayout {
     private boolean nightThemeEnabled;
     private boolean isRussian = true;
     private int orientation = 4;
-    private Button capButton;
     private Window window;
-    private Context context;
+    private View v;
 
-    public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup, Window window, Activity activity) {
+    public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup, Window window, View v) {
         super(context);
         this.callback = callback;
         this.viewGroup = viewGroup;
         this.windowManager = windowManager;
         this.window = window;
-        this.context = context;
-        this.activity = activity;
+        this.v = v;
         OrientationEventListener orientationListener = new OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int i) {
@@ -121,7 +117,7 @@ public class Keyboard extends LinearLayout {
         margin = Math.round(width / 135) / 2;
         //dpWidth = Math.round(width / param) - margin * 2;
         dpWidth = (int) Math.floor(width / param) - margin * 2;
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.BOTTOM;
 
         if (width > height) { // Пейзаж
@@ -129,7 +125,7 @@ public class Keyboard extends LinearLayout {
             if (isTablet(getContext())) {
                 params.setMargins(0, 0,0, getSize() * 2);
             }
-            else if (!isNavBarOnTheLeftSide()) {
+            else if (isButtonsOnTheRight()) {
                 params.setMargins(0, 0, getSize(), 0);
             } else {
                 params.setMargins(getSize(), 0, 0, 0);
@@ -143,12 +139,41 @@ public class Keyboard extends LinearLayout {
                 params.setMargins(0, getSize(), 0, 0);
             }
         }
+
         LayoutInflater inflater = LayoutInflater.from(getContext());
+        keyboardView = (LinearLayout) inflater.inflate(R.layout.keyboard_view, null, false);
+        ((ViewGroup) v).addView(keyboardView);
+        keyboardView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+        LinearLayout ll = keyboardView.findViewById(R.id.button_1);
+        ll.setLayoutParams(params);
+
+        ArrayList<String[]> array = new ArrayList<>();
+        array.add(keyboard[0]);
+        if (isRussian) {
+            for (int i = 1; i < 4; i++) {
+                array.add(keyboard[i]);
+            }
+        } else {
+            for (int i = 4; i < 7; i++) {
+                array.add(keyboard[i]);
+            }
+        }
+        addKeys(array);
+        isKeyboardActive = true;
+
+        /*LayoutInflater inflater = LayoutInflater.from(getContext());
         if (numberLineEnabled) {
             keyboardView = inflater.inflate(R.layout.keyboard_view_nums, viewGroup, true);
         } else {
             keyboardView = inflater.inflate(R.layout.keyboard_view, viewGroup, true);
         }
+        LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.keyboard_view, null, false);
+        ((ViewGroup) v ).addView(ll);
         linearLayout = keyboardView.findViewById(R.id.button_1);
         linearLayout.setLayoutParams(params);
         keyboardView.setOnTouchListener(new OnTouchListener() {
@@ -170,7 +195,7 @@ public class Keyboard extends LinearLayout {
             }
         }
         addKeys(array);
-        isKeyboardActive = true;
+        isKeyboardActive = true;*/
     }
 
     @Override
@@ -393,15 +418,17 @@ public class Keyboard extends LinearLayout {
         private KeyListener callback;
         private ViewGroup viewGroup;
         private Window window;
+        private View v;
         private Activity activity;
         private boolean nightMode = false;
         private boolean numberLine = false;
 
-        public Builder(Activity activity, KeyListener callback) {
+        public Builder(Activity activity, KeyListener callback, View v) {
             this.context = activity.getApplicationContext();
             this.windowManager = activity.getWindowManager();
             this.callback = callback;
             this.viewGroup = (ViewGroup) activity.getWindow().getDecorView().getRootView();
+            this.v = v;
             this.window = activity.getWindow();
             this.activity = activity;
         }
@@ -417,16 +444,50 @@ public class Keyboard extends LinearLayout {
         }
 
         public Keyboard build() {
-            Keyboard keyboard = new Keyboard(context, windowManager, callback, viewGroup, window, activity);
+            Keyboard keyboard = new Keyboard(context, windowManager, callback, viewGroup, window, v);
             keyboard.setNightMode(nightMode);
             keyboard.setNumberLine(numberLine);
             return keyboard;
         }
     }
 
+    private int getSize() {
+        Rect rectangle = new Rect();
+        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+        int statusBarHeight = rectangle.top;
+        int displayHeight = windowManager.getDefaultDisplay().getHeight();
+        int windowHeight = window.getDecorView().getHeight();
+        int displayWidth = windowManager.getDefaultDisplay().getWidth();
+        int windowWidth = window.getDecorView().getWidth();
+        Log.e(TAG, "Status bar height: " + statusBarHeight);
+        Log.e(TAG, "Display height: " + displayHeight);
+        Log.e(TAG, "Window height: " + windowHeight);
+        Log.e(TAG, "Display width: " + displayWidth);
+        Log.e(TAG, "Window width: " + windowWidth);
+        if (displayHeight > displayWidth || isTablet(getContext())) {
+            if (displayHeight == windowHeight) {
+                return 0;
+            }
+            if (statusBarHeight * 3 > displayHeight) {
+                return window.getDecorView().getHeight() - windowManager.getDefaultDisplay().getHeight();
+            } else {
+                return window.getDecorView().getHeight() - windowManager.getDefaultDisplay().getHeight() - statusBarHeight;
+            }
+        } else {
+            if (displayWidth == windowWidth) {
+                return 0;
+            }
+            if (statusBarHeight * 3 > displayWidth) {
+                return windowWidth - displayWidth;
+            } else {
+                return windowWidth - displayWidth;// - (statusBarHeight / 2);
+            }
+        }
 
-    private int getSize() { // Размер системных навигационных кнопок (высота)
+    }
 
+
+    /*private int getSize() { // Размер системных навигационных кнопок (высота)
         Rect rectangle = new Rect();
         window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
         int statusBarHeight = rectangle.top;
@@ -435,72 +496,29 @@ public class Keyboard extends LinearLayout {
         int titleBarHeight= contentViewTop - statusBarHeight;
         //Log.e(TAG, "statusBarHeight: " + statusBarHeight);
         //Log.e(TAG, "titleBarHeight: " + titleBarHeight);
-
+        Log.e(TAG, "Width: " + ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth() +
+                        "Height: " + ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight());
+        Log.e(TAG, "Real Width: " + window.getDecorView().getWidth() +
+                "Real Height: " + window.getDecorView().getHeight());
         int h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight()
                 - window.getDecorView().getRootView().getHeight();
+        Log.e(TAG, "first solution = " + h);
         if (h == 0) {
             h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth()
                     - window.getDecorView().getRootView().getWidth();
-            //Log.e(TAG, "h: " + h);
+            Log.e(TAG, "Отступ для navbar: " + h);
             return Math.abs(h);
-
         }
-        //Log.e(TAG, "h: " + h);
-
-
+        Log.e(TAG, "getHeight: " + window.getDecorView().getHeight() + " h: " + h);
+        if (window.getDecorView().getHeight() - Math.abs(h) != 0 || window.getDecorView().getWidth() - Math.abs(h) != 0) {
+            Log.e(TAG, "we are here solution: " + Math.abs(h) + " - " + statusBarHeight);
+            Log.e(TAG, "we are here: " + (Math.abs(h) - statusBarHeight));
+            return Math.abs(h) - statusBarHeight;
+        }
+        Log.e(TAG, "2 Отступ для navbar: " + h);
         return Math.abs(h) - statusBarHeight;
+    }*/
 
-        /*ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView().getRootView(), new androidx.core.view.OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-                final int statusBarHeight = insets.getStableInsetBottom();
-                Log.e(TAG, "statusBarHeight: " + statusBarHeight);
-                return insets.consumeStableInsets();
-            }
-        });
-
-        Resources resources = this.getResources();
-        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            Log.e(TAG, "bar height: " + resources.getDimensionPixelSize(resourceId));
-            Log.e(TAG, "bar height: " + resources.getDimension(resourceId));
-            Log.e(TAG, "bar height: " + resources.getDimensionPixelOffset(resourceId));
-            Log.e(TAG, "bar height new: " + convertDpToPixel(resources.getDimension(resourceId), context));
-            return resources.getDimensionPixelSize(resourceId);
-        }
-        return 0;*/
-    }
-
-    public boolean isNavBarOnTheLeftSide() {
-
-        Rect outRect = new Rect();
-        ViewGroup decor = (ViewGroup) window.getDecorView();
-        decor.getWindowVisibleDisplayFrame(outRect);
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        Log.e(TAG, "value: " + (dm.widthPixels == outRect.bottom));
-
-
-        int rotation =  windowManager.getDefaultDisplay().getRotation();
-        int reqOr = activity.getRequestedOrientation();
-
-        String aVerReleaseStr = Build.VERSION.RELEASE;
-        int dotInd = aVerReleaseStr.indexOf(".");
-        if (dotInd >= 0) {
-            aVerReleaseStr = aVerReleaseStr.replaceAll("\\.", "");
-            aVerReleaseStr = new StringBuffer(aVerReleaseStr).insert(dotInd, ".").toString();
-        }
-
-        float androidVer = Float.parseFloat(aVerReleaseStr);
-        //Log.e(TAG, "androidVer: " + androidVer + " reqOr: " + reqOr);
-
-        if (rotation == 3 && reqOr == 6) {
-            //Log.e(TAG, "buttons on the left");
-            return true;
-        } else {
-            //Log.e(TAG, "buttons on the right");
-            return false;
-        }
-    }
 
     public static boolean isTablet(Context mContext){
         return (mContext.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;

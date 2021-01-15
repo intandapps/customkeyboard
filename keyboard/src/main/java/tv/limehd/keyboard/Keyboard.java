@@ -1,45 +1,22 @@
 package tv.limehd.keyboard;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Point;
-import android.graphics.Rect;
-import android.hardware.Camera;
 import android.hardware.SensorManager;
-import android.os.Build;
-import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
-
-import androidx.annotation.RequiresApi;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class Keyboard extends LinearLayout {
@@ -97,7 +74,6 @@ public class Keyboard extends LinearLayout {
                 int rotate = windowManager.getDefaultDisplay().getRotation();
                 if (rotate != orientation) {
                     orientation = rotate;
-                    //Log.e(TAG, "new orientation: " + orientation);
                     if (isKeyboardActive) {
                         hideKeyboard();
                         showKeyboard();
@@ -115,55 +91,18 @@ public class Keyboard extends LinearLayout {
         float width = Float.parseFloat(String.valueOf(size.x));
         float height = Float.parseFloat(String.valueOf(size.y));
         margin = Math.round(width / 135) / 2;
-        //dpWidth = Math.round(width / param) - margin * 2;
         dpWidth = (int) Math.floor(width / param) - margin * 2;
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.BOTTOM;
 
-        if (width > height) { // Пейзаж
-            dpHeight = Math.round(height / param) - margin * 2;
-            if (isTablet(getContext())) {
-                //params.setMargins(0, 0,0, getSize() * 2);
-                params.setMargins(0, 0,0, 0);
-
-            }
-            else if (isButtonsOnTheRight()) {
-                //params.setMargins(0, 0, getSize(), 0);
-                params.setMargins(0, 0, 0, 0);
-
-            } else {
-                //params.setMargins(getSize(), 0, 0, 0);
-                params.setMargins(0, 0, 0, 0);
-            }
-        } else { // Портрет
-            dpHeight = Math.round(dpWidth * sizeRation) - margin * 2;
-            if (isButtonsOnTheBottom()) {
-                //params.setMargins(0, 0, 0, getSize());
-                params.setMargins(0, 0, 0, 0);
-
-            } else {
-                //params.setMargins(0, getSize(), 0, 0);
-                params.setMargins(0, 0, 0, 0);
-
-            }
-        }
+        dpHeight = width > height ? (Math.round(height / param) - margin * 2) : Math.round(dpWidth * sizeRation) - margin * 2;
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
-
-        if (numberLineEnabled) {
-            keyboardView = (LinearLayout) inflater.inflate(R.layout.keyboard_view_nums, null, false);
-        } else {
-            keyboardView = inflater.inflate(R.layout.keyboard_view, null, false);
-        }
+        int resId = numberLineEnabled ? R.layout.keyboard_view_nums : R.layout.keyboard_view;
+        keyboardView = inflater.inflate(resId, null, false);
 
         ((ViewGroup) v).addView(keyboardView);
-        keyboardView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
-        //LinearLayout ll = (LinearLayout) keyboardView.findViewById(R.id.button_1);
+        keyboardView.setOnTouchListener((v, event) -> true);
         keyboardView.setLayoutParams(params);
 
         ArrayList<String[]> array = new ArrayList<>();
@@ -179,37 +118,6 @@ public class Keyboard extends LinearLayout {
         }
         addKeys(array);
         isKeyboardActive = true;
-
-        /*LayoutInflater inflater = LayoutInflater.from(getContext());
-        if (numberLineEnabled) {
-            keyboardView = inflater.inflate(R.layout.keyboard_view_nums, viewGroup, true);
-        } else {
-            keyboardView = inflater.inflate(R.layout.keyboard_view, viewGroup, true);
-        }
-        LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.keyboard_view, null, false);
-        ((ViewGroup) v ).addView(ll);
-        linearLayout = keyboardView.findViewById(R.id.button_1);
-        linearLayout.setLayoutParams(params);
-        keyboardView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
-
-        ArrayList<String[]> array = new ArrayList<>();
-        array.add(keyboard[0]);
-        if (isRussian) {
-            for (int i = 1; i < 4; i++) {
-                array.add(keyboard[i]);
-            }
-        } else {
-            for (int i = 4; i < 7; i++) {
-                array.add(keyboard[i]);
-            }
-        }
-        addKeys(array);
-        isKeyboardActive = true;*/
     }
 
     @Override
@@ -343,6 +251,20 @@ public class Keyboard extends LinearLayout {
         keyboardView.requestFocusFromTouch();
     }
 
+    public int getKeyboardHeight() {
+        //dpHeight = width > height ? (Math.round(height / param) - margin * 2) : Math.round(dpWidth * sizeRation) - margin * 2
+        int d = dpHeight + margin * 2;
+        int lines = 4;
+        if (numberLineEnabled) lines++;
+        Log.e("Keyboard.java", "d: " + d);
+        return d * lines;
+        /*DisplayMetrics dp = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(dp);
+        Log.e("Keyboard.java", "dp.heightPixels: " + dp.heightPixels);
+        Log.e("Keyboard.java", "solution: " + dp.heightPixels * lines / param);
+        return Math.round(dp.heightPixels * lines / param);*/
+    }
+
     private void setLangunageButtonSize(Button button) {
         LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         params.height = dpHeight ;
@@ -400,12 +322,9 @@ public class Keyboard extends LinearLayout {
 
     public void hideKeyboard() {
         if (keyboardView != null) {
-            //View v = keyboardView.findViewById(R.id.button_1);
-            //viewGroup.removeView(v);
             ((ViewGroup) v).removeView(keyboardView);
-            //Log.e(TAG, "Keyboard was hidden");
         } else {
-            //Log.e("Keyboard", "Keyboard is null!");
+            Log.e(TAG, "Keyboard is null");
         }
         isKeyboardActive = false;
     }
@@ -463,99 +382,6 @@ public class Keyboard extends LinearLayout {
             keyboard.setNightMode(nightMode);
             keyboard.setNumberLine(numberLine);
             return keyboard;
-        }
-    }
-
-    private int getSize() {
-        Rect rectangle = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
-        int statusBarHeight = rectangle.top;
-        int displayHeight = windowManager.getDefaultDisplay().getHeight();
-        int windowHeight = window.getDecorView().getHeight();
-        int displayWidth = windowManager.getDefaultDisplay().getWidth();
-        int windowWidth = window.getDecorView().getWidth();
-        Log.e(TAG, "Status bar height: " + statusBarHeight);
-        Log.e(TAG, "Display height: " + displayHeight);
-        Log.e(TAG, "Window height: " + windowHeight);
-        Log.e(TAG, "Display width: " + displayWidth);
-        Log.e(TAG, "Window width: " + windowWidth);
-        if (displayHeight > displayWidth || isTablet(getContext())) {
-            if (displayHeight == windowHeight) {
-                return 0;
-            }
-            if (statusBarHeight * 3 > displayHeight) {
-                return window.getDecorView().getHeight() - windowManager.getDefaultDisplay().getHeight();
-            } else {
-                return window.getDecorView().getHeight() - windowManager.getDefaultDisplay().getHeight() - statusBarHeight;
-            }
-        } else {
-            if (displayWidth == windowWidth) {
-                return 0;
-            }
-            if (statusBarHeight * 3 > displayWidth) {
-                return windowWidth - displayWidth;
-            } else {
-                return windowWidth - displayWidth;// - (statusBarHeight / 2);
-            }
-        }
-
-    }
-
-
-    /*private int getSize() { // Размер системных навигационных кнопок (высота)
-        Rect rectangle = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
-        int statusBarHeight = rectangle.top;
-        int contentViewTop =
-                window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-        int titleBarHeight= contentViewTop - statusBarHeight;
-        //Log.e(TAG, "statusBarHeight: " + statusBarHeight);
-        //Log.e(TAG, "titleBarHeight: " + titleBarHeight);
-        Log.e(TAG, "Width: " + ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth() +
-                        "Height: " + ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight());
-        Log.e(TAG, "Real Width: " + window.getDecorView().getWidth() +
-                "Real Height: " + window.getDecorView().getHeight());
-        int h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight()
-                - window.getDecorView().getRootView().getHeight();
-        Log.e(TAG, "first solution = " + h);
-        if (h == 0) {
-            h = ((WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth()
-                    - window.getDecorView().getRootView().getWidth();
-            Log.e(TAG, "Отступ для navbar: " + h);
-            return Math.abs(h);
-        }
-        Log.e(TAG, "getHeight: " + window.getDecorView().getHeight() + " h: " + h);
-        if (window.getDecorView().getHeight() - Math.abs(h) != 0 || window.getDecorView().getWidth() - Math.abs(h) != 0) {
-            Log.e(TAG, "we are here solution: " + Math.abs(h) + " - " + statusBarHeight);
-            Log.e(TAG, "we are here: " + (Math.abs(h) - statusBarHeight));
-            return Math.abs(h) - statusBarHeight;
-        }
-        Log.e(TAG, "2 Отступ для navbar: " + h);
-        return Math.abs(h) - statusBarHeight;
-    }*/
-
-
-    public static boolean isTablet(Context mContext){
-        return (mContext.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
-    }
-
-    private boolean isButtonsOnTheRight() {
-        int rotate = windowManager.getDefaultDisplay().getRotation();
-        switch (rotate) {
-            case Surface.ROTATION_90:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private boolean isButtonsOnTheBottom() {
-        int rotate = windowManager.getDefaultDisplay().getRotation();
-        switch (rotate) {
-            case Surface.ROTATION_0:
-                return true;
-            default:
-                return false;
         }
     }
 }

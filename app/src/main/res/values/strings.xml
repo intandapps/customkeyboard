@@ -3,4 +3,6 @@
     <string name="keyboard_button">Клавиатура</string>
     <string name="night_mode">Ночной режим</string>
     <string name="numbers_mode">Добавить цифры</string>
+    <string name="input_hint">Нажмите чтобы начать ввод</string>
+    <string name="hide_keyboard">Скрыть клавиатуру</string>
 </resources>

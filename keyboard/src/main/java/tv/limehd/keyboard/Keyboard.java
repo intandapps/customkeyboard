@@ -264,7 +264,7 @@ public class Keyboard extends LinearLayout {
         setClearSize(ib);
     }
 
-    public int getButtonsId() {
+    public static int getButtonsId() {
         return R.id.button_1;
     }
 

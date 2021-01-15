@@ -262,7 +262,10 @@ public class Keyboard extends LinearLayout {
             callback.onKeyboardOkClicked();
         });
         setClearSize(ib);
-        keyboardView.setId(R.id.button_1);
+    }
+
+    public int getButtonsId() {
+        return R.id.button_1;
     }
 
     public void setFocusOnFirstKey() {

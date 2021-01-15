@@ -186,7 +186,6 @@ public class Keyboard extends LinearLayout {
             for (int j = 0; j < array.length; j++) {
                 View v = inflater.inflate(R.layout.keyboard_item, linearLayout, true);
                 Button b = v.findViewById(R.id.key_button);
-                //b.setFocusableInTouchMode(true);
                 b.setFocusable(true);
                 if (i == startIndex && j == 0) firstKey = b;
                 b.setText(array[j]);
@@ -263,6 +262,7 @@ public class Keyboard extends LinearLayout {
             callback.onKeyboardOkClicked();
         });
         setClearSize(ib);
+        keyboardView.setId(R.id.button_1);
     }
 
     public void setFocusOnFirstKey() {

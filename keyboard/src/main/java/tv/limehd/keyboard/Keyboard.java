@@ -192,9 +192,6 @@ public class Keyboard extends LinearLayout {
                 b.setText(array[j]);
                 b.setOnClickListener(v1 -> {
                     callback.onKeyClicked(b.getText().toString());
-
-                    Log.e(TAG, "Символ: " + b.getText().toString() + " isFocused: " + b.isFocused() + " isFocusable: " + b.isFocusable() + " focusBoard: " + keyboardView.isFocused());
-                    //setFocusOnBoard();
                 });
                 if (nightThemeEnabled) {
                     b.setTextColor(getResources().getColor(R.color.white));
@@ -207,13 +204,10 @@ public class Keyboard extends LinearLayout {
             if (isRussian && array.length == keyboard[3].length || !isRussian && array.length == keyboard[6].length) {
                 View v = inflater.inflate(R.layout.keyboard_clear, linearLayout, true);
                 ImageButton button = v.findViewById(R.id.key_button);
-                //button.setFocusableInTouchMode(true);
-                //button.setFocusable(true);
                 setClearSize(button);
                 button.setBackgroundResource(R.drawable.action_button_style);
                 button.setOnClickListener(v1 -> {
                     callback.onDeleteButtonClicked();
-                    //setFocusOnBoard();
                 }); // Стереть 1 символ
                 button.setOnLongClickListener(v1 -> {
                     callback.onLongDeleteButtonClicked();
@@ -231,8 +225,6 @@ public class Keyboard extends LinearLayout {
         linearLayout = keyboardView.findViewById(getLinearLayoutId(numberLineEnabled ? keyLines.size() : keyLines.size() - 1));
         View v = inflater.inflate(R.layout.keyboard_hide, linearLayout, true);
         ImageButton ib = v.findViewById(R.id.key_button);
-        //ib.setFocusableInTouchMode(true);
-        //ib.setFocusable(true);
         if (nightThemeEnabled) {
             ib.setBackground(getResources().getDrawable(R.drawable.night_action_button_style));
             ib.setColorFilter(getResources().getColor(R.color.white));
@@ -247,10 +239,8 @@ public class Keyboard extends LinearLayout {
         // Добавление пробела
         v = inflater.inflate(R.layout.keyboard_space, linearLayout, true);
         Button b = v.findViewById(R.id.key_button);
-        //b.setFocusableInTouchMode(true);
         b.setOnClickListener(v1 -> {
             callback.onKeyClicked(" ");
-            //setFocusOnBoard();
         });
         setSpaceSize(b);
         b.setId(R.id.button_1);
@@ -301,7 +291,6 @@ public class Keyboard extends LinearLayout {
         int d = dpHeight + margin * 2;
         int lines = 4;
         if (numberLineEnabled) lines++;
-        Log.e("Keyboard.java", "d: " + d);
         return d * lines;
     }
 

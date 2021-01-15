@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -60,6 +61,8 @@ public class Keyboard extends LinearLayout {
     private int orientation = 4;
     private Window window;
     private View v;
+    private View lastFocusedView;
+    private boolean focus;
 
     public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup, Window window, View v) {
         super(context);
@@ -104,6 +107,25 @@ public class Keyboard extends LinearLayout {
         ((ViewGroup) v).addView(keyboardView);
         keyboardView.setOnTouchListener((v, event) -> true);
         keyboardView.setLayoutParams(params);
+        /*keyboardView.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                Log.e(TAG, "Фокус изменён на: " + hasFocus);
+            }
+        });*/
+        keyboardView.getViewTreeObserver().addOnGlobalFocusChangeListener(new ViewTreeObserver.OnGlobalFocusChangeListener() {
+            @Override
+            public void onGlobalFocusChanged(View oldFocus, View newFocus) {
+                if (!focus) focus = true;
+            }
+        });
+        keyboardView.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                focus = hasFocus;
+            }
+        });
+        setFocusOnBoard();
 
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);
@@ -123,6 +145,12 @@ public class Keyboard extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return true;
+    }
+
+    public void clearFocusFromKey() {
+        if (focus) {
+            callback.onKeyboardHideClicked();
+        }
     }
 
     public void setNightThemeEnabled(boolean nightThemeEnabled) {
@@ -145,6 +173,7 @@ public class Keyboard extends LinearLayout {
             if (isRussian && array.length == keyboard[3].length || !isRussian && array.length == keyboard[6].length) {
                 View v = inflater.inflate(R.layout.keyboard_item, linearLayout, true);
                 Button button = v.findViewById(R.id.key_button);
+                //button.setFocusableInTouchMode(true);
                 changeLanguage = button;
                 setLangunageButtonSize(button);
                 if (isRussian) {
@@ -172,6 +201,7 @@ public class Keyboard extends LinearLayout {
             for (int j = 0; j < array.length; j++) {
                 View v = inflater.inflate(R.layout.keyboard_item, linearLayout, true);
                 Button b = v.findViewById(R.id.key_button);
+                //b.setFocusableInTouchMode(true);
                 if (i == startIndex && j == 0) firstKey = b;
                 b.setText(array[j]);
                 b.setOnClickListener(v1 -> callback.onKeyClicked(b.getText().toString()));
@@ -186,6 +216,7 @@ public class Keyboard extends LinearLayout {
             if (isRussian && array.length == keyboard[3].length || !isRussian && array.length == keyboard[6].length) {
                 View v = inflater.inflate(R.layout.keyboard_clear, linearLayout, true);
                 ImageButton button = v.findViewById(R.id.key_button);
+                //button.setFocusableInTouchMode(true);
                 setClearSize(button);
                 button.setBackgroundResource(R.drawable.action_button_style);
                 button.setOnClickListener(v1 -> callback.onDeleteButtonClicked()); // Стереть 1 символ
@@ -205,6 +236,7 @@ public class Keyboard extends LinearLayout {
         linearLayout = keyboardView.findViewById(getLinearLayoutId(numberLineEnabled ? keyLines.size() : keyLines.size() - 1));
         View v = inflater.inflate(R.layout.keyboard_hide, linearLayout, true);
         ImageButton ib = v.findViewById(R.id.key_button);
+        //ib.setFocusableInTouchMode(true);
         if (nightThemeEnabled) {
             ib.setBackground(getResources().getDrawable(R.drawable.night_action_button_style));
             ib.setColorFilter(getResources().getColor(R.color.white));
@@ -219,6 +251,7 @@ public class Keyboard extends LinearLayout {
         // Добавление пробела
         v = inflater.inflate(R.layout.keyboard_space, linearLayout, true);
         Button b = v.findViewById(R.id.key_button);
+        //b.setFocusableInTouchMode(true);
         b.setOnClickListener(v1 -> callback.onKeyClicked(" "));
         setSpaceSize(b);
         b.setId(R.id.button_1);
@@ -229,6 +262,7 @@ public class Keyboard extends LinearLayout {
         }
         v = inflater.inflate(R.layout.keyboard_search, linearLayout, true);
         ib = v.findViewById(R.id.key_button);
+        //ib.setFocusableInTouchMode(true);
         if (nightThemeEnabled) {
             ib.setBackground(getResources().getDrawable(R.drawable.night_action_button_style));
             ib.setColorFilter(getResources().getColor(R.color.white));

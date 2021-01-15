@@ -1,6 +1,8 @@
 package tv.limehd.customkeyboard;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -41,6 +43,12 @@ public class MainActivity extends AppCompatActivity implements Keyboard.KeyListe
             hideKeyboard();
         });
         updateHideButton();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        keyboard.clearFocusFromKey();
+        return super.onTouchEvent(event);
     }
 
     private void updateHideButton() {

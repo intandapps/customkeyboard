@@ -251,6 +251,20 @@ public class Keyboard extends LinearLayout {
         keyboardView.requestFocusFromTouch();
     }
 
+    public int getKeyboardHeight() {
+        //dpHeight = width > height ? (Math.round(height / param) - margin * 2) : Math.round(dpWidth * sizeRation) - margin * 2
+        int d = dpHeight + margin * 2;
+        int lines = 4;
+        if (numberLineEnabled) lines++;
+        Log.e("Keyboard.java", "d: " + d);
+        return d * lines;
+        /*DisplayMetrics dp = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(dp);
+        Log.e("Keyboard.java", "dp.heightPixels: " + dp.heightPixels);
+        Log.e("Keyboard.java", "solution: " + dp.heightPixels * lines / param);
+        return Math.round(dp.heightPixels * lines / param);*/
+    }
+
     private void setLangunageButtonSize(Button button) {
         LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         params.height = dpHeight ;

@@ -45,12 +45,6 @@ public class MainActivity extends AppCompatActivity implements Keyboard.KeyListe
         updateHideButton();
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        keyboard.clearFocusFromKey();
-        return super.onTouchEvent(event);
-    }
-
     private void updateHideButton() {
         int visibility = isKeyboardActive ? VISIBLE : INVISIBLE;
         hideKeyboardButton.setVisibility(visibility);
@@ -102,5 +96,11 @@ public class MainActivity extends AppCompatActivity implements Keyboard.KeyListe
     @Override
     public void onKeyboardOkClicked() {
         Toast.makeText(this, "OnKeyboardOkClicked", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) hideKeyboard();
+        return false;
     }
 }

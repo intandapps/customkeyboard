@@ -270,6 +270,7 @@ public class Keyboard extends LinearLayout {
         }
         v = inflater.inflate(R.layout.keyboard_search, linearLayout, true);
         ib = v.findViewById(R.id.key_button);
+        ib.setId(R.id.button_1);
         //ib.setFocusableInTouchMode(true);
         ib.setFocusable(true);
         if (nightThemeEnabled) {

@@ -1,14 +1,20 @@
 package tv.limehd.customkeyboard;
 
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.appcompat.widget.AppCompatImageView;
+
 import tv.limehd.keyboard.Keyboard;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -102,5 +108,43 @@ public class MainActivity extends AppCompatActivity implements Keyboard.KeyListe
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) hideKeyboard();
         return false;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN)
+        {
+            Log.e("MainActivity.java", "Starting search..");
+            View v = findViewAtPosition(getWindow().getDecorView().getRootView(), (int) ev.getRawX(), (int) ev.getRawY());
+            Log.e("MainActivity.java", String.valueOf(v));
+            Log.e("MainActivity.java", "end.");
+            if (v instanceof EditText || v instanceof AppCompatImageButton || v instanceof AppCompatImageView || v != null && v.getId() == Keyboard.getButtonsId() || v == null) {
+                return super.dispatchTouchEvent(ev);
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private View findViewAtPosition(View parent, int x, int y) {
+        if (parent instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup)parent;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                View child = viewGroup.getChildAt(i);
+                View viewAtPosition = findViewAtPosition(child, x, y);
+                if (viewAtPosition != null) {
+                    return viewAtPosition;
+                }
+                Log.e("MainActivity", String.valueOf(viewAtPosition));
+            }
+            return null;
+        } else {
+            Rect rect = new Rect();
+            parent.getGlobalVisibleRect(rect);
+            if (rect.contains(x, y)) {
+                return parent;
+            } else {
+                return null;
+            }
+        }
     }
 }

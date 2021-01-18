@@ -17,6 +17,7 @@ import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import java.util.ArrayList;
@@ -61,18 +62,19 @@ public class Keyboard extends LinearLayout {
     private boolean isRussian = true;
     private int orientation = 4;
     private Window window;
-    private View v;
     private View lastFocusedView;
     private boolean focus;
+    private Context context;
     int counter = 0;
 
-    public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup, Window window, View v) {
+    public Keyboard(Context context, WindowManager windowManager, KeyListener callback, ViewGroup viewGroup, Window window) {
         super(context);
         this.callback = callback;
         this.viewGroup = viewGroup;
         this.windowManager = windowManager;
         this.window = window;
-        this.v = v;
+        this.context = context;
+        this.viewGroup = viewGroup;
         OrientationEventListener orientationListener = new OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int i) {
@@ -97,18 +99,25 @@ public class Keyboard extends LinearLayout {
         float height = Float.parseFloat(String.valueOf(size.y));
         margin = Math.round(width / 135) / 2;
         dpWidth = (int) Math.floor(width / param) - margin * 2;
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.BOTTOM;
 
         dpHeight = width > height ? (Math.round(height / param) - margin * 2) : Math.round(dpWidth * sizeRation) - margin * 2;
+        //Log.e(TAG, "dpHeight: " + dpHeight);
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
         int resId = numberLineEnabled ? R.layout.keyboard_view_nums : R.layout.keyboard_view;
         keyboardView = inflater.inflate(resId, null, false);
 
-        ((ViewGroup) v).addView(keyboardView);
+        viewGroup.addView(keyboardView);
         keyboardView.setOnTouchListener((v, event) -> true);
         keyboardView.setLayoutParams(params);
+
+        KeyboardView keyboardView1 = new KeyboardView(context);
+        viewGroup.addView(keyboardView1);
+        //Log.e(TAG, "keyboardView height: " + keyboardView.getHeight());
+        keyboardView1.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getKeyboardHeight()));
+
 
         ArrayList<String[]> array = new ArrayList<>();
         array.add(keyboard[0]);
@@ -138,6 +147,17 @@ public class Keyboard extends LinearLayout {
 
     public void setNightThemeEnabled(boolean nightThemeEnabled) {
         this.nightThemeEnabled = nightThemeEnabled;
+    }
+
+    public boolean isKeyboardView(View view) {
+        try {
+            if (view instanceof KeyboardView || view.getId() == R.id.button_1) {
+                return true;
+            }
+        } catch (Exception ex) {
+            return false;
+        }
+        return false;
     }
 
     private void addKeys(ArrayList<String[]> keyLines) {
@@ -328,6 +348,7 @@ public class Keyboard extends LinearLayout {
         params.bottomMargin = margin;
         params.topMargin = margin;
         button.setLayoutParams(params);
+        //Log.e(TAG, "dpHeight: " + dpHeight + " font size: " + button.getTextSize());
     }
 
     private void setSpaceSize(Button button) {
@@ -354,7 +375,7 @@ public class Keyboard extends LinearLayout {
 
     public void hideKeyboard() {
         if (keyboardView != null) {
-            ((ViewGroup) v).removeView(keyboardView);
+            viewGroup.removeView(keyboardView);
         } else {
             Log.e(TAG, "Keyboard is null");
         }
@@ -384,17 +405,16 @@ public class Keyboard extends LinearLayout {
         private KeyListener callback;
         private ViewGroup viewGroup;
         private Window window;
-        private View v;
         private Activity activity;
         private boolean nightMode = false;
         private boolean numberLine = false;
 
-        public Builder(Activity activity, KeyListener callback, View v) {
+        public Builder(Activity activity, KeyListener callback, ViewGroup viewGroup) {
             this.context = activity.getApplicationContext();
             this.windowManager = activity.getWindowManager();
             this.callback = callback;
-            this.viewGroup = (ViewGroup) activity.getWindow().getDecorView().getRootView();
-            this.v = v;
+            this.viewGroup = viewGroup;
+            this.viewGroup = viewGroup;
             this.window = activity.getWindow();
             this.activity = activity;
         }
@@ -410,7 +430,7 @@ public class Keyboard extends LinearLayout {
         }
 
         public Keyboard build() {
-            Keyboard keyboard = new Keyboard(context, windowManager, callback, viewGroup, window, v);
+            Keyboard keyboard = new Keyboard(context, windowManager, callback, viewGroup, window);
             keyboard.setNightMode(nightMode);
             keyboard.setNumberLine(numberLine);
             return keyboard;
